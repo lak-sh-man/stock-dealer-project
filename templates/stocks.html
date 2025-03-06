@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron">
+    <h1>Stocks list</h1>
+  </div>
+
+    <table class="table table-striped" id="stock-table">
+        <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Outstanding Shares</th>
+                <th>LTP</th>
+                <th>Open Price</th>
+                <th>High Price</th>
+                <th>Low Price</th>
+                <th>Market Cap</th>
+                <th>Traded Time</th>
+            </tr>
+        </thead>
+        <tbody id="stock-table-body">
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+    
+{% endblock %}
+ 
