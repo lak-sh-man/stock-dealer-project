@@ -1,26 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container" >
+<div class="container">
     <form class="form-group" method="POST">
-    {# This hidden_tag is a CSRF security feature. #}
-        {{ form.hidden_tag() }}
         <div class="form-group">
-            {{form.username.label(class="form-control-label") }}
-            {{form.username(class='form-control form-control-label')  }}
+            <label for="username">Username</label>
+            <input type="text" name="username" class="form-control" required>
         </div>
         <div class="form-group">
-            {{form.password.label(class="form-control-label") }}
-            {{form.password(class='form-control form-control-label')  }}
+            <label for="password">Password</label>
+            <input type="password" name="password" class="form-control" required>
         </div>
         <div class="form-group">
-            {{form.pass_confirm.label(class="form-control-label") }}
-            {{form.pass_confirm(class='form-control form-control-label')  }}
-        </div> 
+            <label for="pass_confirm">Confirm Password</label>
+            <input type="password" name="pass_confirm" class="form-control" required>
+        </div>
         <div class="form-group">
-            {{form.submit(class="btn btn-primary") }}
+            <button type="submit" class="btn btn-primary">Register</button>
         </div>
     </form>
+
+    {% if errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error['loc'][0] }}: {{ error['msg'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
+
 
 
