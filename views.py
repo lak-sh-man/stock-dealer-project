@@ -1,6 +1,4 @@
-from fastapi import Body, FastAPI
-
-app = FastAPI()
+from setup import app
 
 
 @app.get("/")

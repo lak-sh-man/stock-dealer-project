@@ -1,12 +1,11 @@
-from database_setup import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from setup import Base
+from sqlalchemy import Column, Integer, String, Float
 
 
-class Todos(Base):
-    __tablename__ = 'todos'
+class User(Base):
+    __tablename__ = "user"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    description = Column(String)
-    priority = Column(Integer)
-    complete = Column(Boolean, default=False)
+    username = Column(String(50), unique=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    balance = Column(Float, nullable=False, default=100000.0)
