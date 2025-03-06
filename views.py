@@ -5,7 +5,7 @@ from schema import Register_pyd_schema, Login_pyd_schema
 from pydantic import ValidationError
 
 from fastapi import Depends, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.templating import Jinja2Templates
@@ -25,7 +25,7 @@ def get_db():
         db.close()
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
@@ -37,9 +37,17 @@ async def register(request: Request, db: Session = Depends(get_db)):
         username = form.get("username")
         password = form.get("password")
 
-        user = User(username=username, password=password)
+        # Validate using Pydantic Model
+        try:
+            register_data = Register_pyd_schema(username=username, password=password)
+        except ValidationError as e:
+            return templates.TemplateResponse("register.html", {"request": request, "errors": e.errors()})
+
+        # Save user to database
+        user = User(username=register_data.username, password=register_data.password)
         db.add(user)
         db.commit()
+
         return RedirectResponse(url="/login", status_code=303)
 
     return templates.TemplateResponse("register.html", {"request": request})
@@ -52,13 +60,20 @@ async def login(request: Request, db: Session = Depends(get_db)):
         username = form.get("username")
         password = form.get("password")
 
-        user = db.query(User).filter(User.username == username).first()
-        if user and user.password == password:
+        # Validate using Pydantic Model
+        try:
+            login_data = Login_pyd_schema(username=username, password=password)
+        except ValidationError as e:
+            return templates.TemplateResponse("login.html", {"request": request, "errors": e.errors()})
+
+        # Check user in database
+        user = db.query(User).filter(User.username == login_data.username).first()
+        if user and user.password == login_data.password:
             request.session["session_user_id"] = user.id
             request.session["session_user_name"] = user.username
             return RedirectResponse(url="/", status_code=303)
 
-        return HTMLResponse("Invalid username or password")
+        return templates.TemplateResponse("login.html", {"request": request, "errors": [{"msg": "Invalid username or password"}]})
 
     return templates.TemplateResponse("login.html", {"request": request})
 
