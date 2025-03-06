@@ -46,7 +46,7 @@ async def register(request: Request, db: Session = Depends(get_db)):
 
 
 @app.route("/login", methods=["GET", "POST"])
-async def login(request: Request, user_data: Login, db: Session = Depends(get_db)):
+async def login(request: Request, db: Session = Depends(get_db)):
     if request.method == "POST":
         form = await request.form()
         username = form.get("username")
