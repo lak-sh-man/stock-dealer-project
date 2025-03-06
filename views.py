@@ -1,7 +1,7 @@
 import uvicorn
 from setup import app, SessionLocal
 from models import User
-from schema import Register, Login
+from schema import Register_pyd_schema, Login_pyd_schema
 from pydantic import ValidationError
 
 from fastapi import Depends, Request, Form
