@@ -21,6 +21,31 @@
             <!-- Data will be inserted here dynamically -->
         </tbody>
     </table>
+
+    <script>
+        let userId = "{{ session_user_id }}";
+        let socket = new WebSocket("ws://localhost:8000/ws/stocks/" + userId);
+    
+        socket.onmessage = function(event) {
+            let stocks_data_from_consumers = JSON.parse(event.data);
+            let tableBody = document.getElementById("stock-table-body");
+            tableBody.innerHTML = "";
+    
+            stocks_data_from_consumers.forEach(stock => {
+                let row = `<tr>
+                    <td>${stock.Company_Name}</td>
+                    <td>${stock.Outstanding_Shares}</td>
+                    <td>${stock.LTP}</td>
+                    <td>${stock.Price_Open}</td>
+                    <td>${stock.high}</td>
+                    <td>${stock.low}</td>
+                    <td>${stock.Marketcap}</td>
+                    <td>${new Date(stock.traded_time).toLocaleTimeString()}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        };
+    </script>
     
 {% endblock %}
  

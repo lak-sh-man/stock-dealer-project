@@ -1,4 +1,4 @@
-from setup import app, SessionLocal
+from setup import SessionLocal, app
 from sqlalchemy.orm import Session
 from typing import Annotated
 from fastapi import Depends
