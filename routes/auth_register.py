@@ -25,11 +25,16 @@ async def register_post(
     password: str = Form(...),
     pass_confirm: str = Form(...)
 ):
+    
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        return templates.TemplateResponse("register.html", {"request": request, "errors": [{"msg": "username already exist"}]})
+    
     # Validate using Pydantic Model
     try:
         register_data = Register_pyd_schema(username=username, password=password, pass_confirm=pass_confirm)
         if register_data.password != register_data.pass_confirm:
-            raise ValidationError([{"loc": ("password",), "msg": "Passwords do not match"}])
+            return templates.TemplateResponse("register.html", {"request": request, "errors": [{"msg": "Passwords do not match"}]})
     except ValidationError as e:
         return templates.TemplateResponse("register.html", {"request": request, "errors": e.errors()})
 
