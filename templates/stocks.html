@@ -26,6 +26,18 @@
         let userId = "{{ session_user_id }}";
         let socket = new WebSocket("ws://localhost:8000/ws/stocks/" + userId);
     
+        socket.onopen = function(event) {
+            console.log("WebSocket connected!");
+        };
+        
+        socket.onerror = function(event) {
+            console.error("WebSocket error:", event);
+        };
+        
+        socket.onmessage = function(event) {
+            console.log("Message received:", event.data);
+        };
+    
         socket.onmessage = function(event) {
             let stocks_data_from_consumers = JSON.parse(event.data);
             let tableBody = document.getElementById("stock-table-body");

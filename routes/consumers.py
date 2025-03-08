@@ -18,6 +18,7 @@ async def stock_updates(websocket: WebSocket, user_id: str):
         while True:
             stock_data = await fetch_stock_data()
             print(Back.BLUE + f"Sending message => User ID: {user_id}" + Style.RESET_ALL)
+            print(stock_data)
             await websocket.send_json(stock_data)
             await asyncio.sleep(60)  # Send updates every second
     except WebSocketDisconnect:
