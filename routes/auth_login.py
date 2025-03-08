@@ -12,6 +12,9 @@ router = APIRouter()
 
 @router.get("/login")
 async def login_get(request: Request):
+    if "session_user_id" in request.session:
+        return templates.TemplateResponse("/error_pages/errors.html", {"request": request, "errors": [{"msg": "logout to access the login page"}]})
+    
     return templates.TemplateResponse("login.html", {"request": request})
 
 

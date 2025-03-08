@@ -11,6 +11,9 @@ router = APIRouter()
 
 @router.get("/register")
 async def register_get(request: Request):
+    if "session_user_id" in request.session:
+        return templates.TemplateResponse("/error_pages/errors.html", {"request": request, "errors": [{"msg": "logout to access the register page"}]})
+    
     return templates.TemplateResponse("register.html", {"request": request})
 
 

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron">
+    <h1>Access Forbidden!</h1>
+  </div>
+
+  {% if errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for error in errors %}
+                <li>
+                    {% if 'loc' in error %}
+                        {{ error['loc'][0] }}: {{ error['msg'] }}
+                    {% else %}
+                        {{ error['msg'] }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+{% endblock %}
