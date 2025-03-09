@@ -19,11 +19,13 @@ async def stocks(request: Request):
 
 # Fetch stock data from API
 async def fetch_stock_data():
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(STOCKS_API_URL)
-        if response.status_code == 200:
-            return response.json()
-        return []
+        try:
+            data = response.json()
+            return data
+        except Exception as e:
+            return []
     
     
 # Background task to store stock data every minute
