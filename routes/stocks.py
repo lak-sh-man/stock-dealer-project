@@ -20,8 +20,8 @@ async def stocks(request: Request):
 # Fetch stock data from API
 async def fetch_stock_data():
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(STOCKS_API_URL)
         try:
+            response = await client.get(STOCKS_API_URL)
             data = response.json()
             return data
         except Exception as e:

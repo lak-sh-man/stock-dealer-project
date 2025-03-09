@@ -22,12 +22,14 @@ async def stock_updates(websocket: WebSocket, user_id: str):
             if websocket.client_state != WebSocketState.CONNECTED:
                 break  # Ensure we're not sending data to a closed connection
             
-            await websocket.send_json(stock_data)
+            await websocket.send_json(stock_data[0:2])
             print(Back.BLUE + f"Sent message to {user_id}" + Style.RESET_ALL)
             await asyncio.sleep(60)  
             
     except WebSocketDisconnect:
-        print(Back.RED + f"Exceptional disconnect => User ID: {user_id}" + Style.RESET_ALL)
+        await websocket.close()
+        connected_clients.pop(user_id, None)
+        print(Back.MAGENTA + f"Exception, so disconnecting => User ID: {user_id} | connected_clients: {connected_clients}" + Style.RESET_ALL)
         
     finally:
         # Ensure the WebSocket is removed and closed properly
