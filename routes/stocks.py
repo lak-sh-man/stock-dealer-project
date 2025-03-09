@@ -25,7 +25,28 @@ async def fetch_stock_data():
             data = response.json()
             return data
         except Exception as e:
-            return []
+            return [{
+                    "Company_Name": "-",
+                    "Code_act": "-",
+                    "Code": "-",
+                    "LTP": "-",
+                    "Price_Open": "-",
+                    "Volume": "-",
+                    "Marketcap": "-",
+                    "PE": "-",
+                    "EPS": "-",
+                    "Outstanding_Shares": "-",
+                    "Change_percent": "-",
+                    "currency": "-",
+                    "52_week_high": "-",
+                    "52_week_low": "-",
+                    "Volume_avg": "-",
+                    "high": "-",
+                    "low": "-",
+                    "traded_time": "2025-03-07T10:00:00.000Z",
+                    "change": "-",
+                    "closeyest": "-"
+                    }]
     
     
 # Background task to store stock data every minute
