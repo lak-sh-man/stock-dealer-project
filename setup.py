@@ -22,15 +22,27 @@ import models
 Base.metadata.create_all(bind=engine)
 
 
-@asynccontextmanager 
+@asynccontextmanager
 async def lifespan(app: FastAPI):
-    # imported inside the function to avoid circular imports
-    from routes import stocks 
-    from dependencies import db_dependency 
-    
-    task = asyncio.create_task(stocks.store_stock_data(db_dependency))  # Start storing stock data every minute
-    yield  # Application is running
-    task.cancel()  # Cleanup when shutting down 
+    # Import inside the function to avoid circular imports
+    from routes.stocks import store_stock_data
+    from dependencies import get_db
+
+    # Create a database session
+    db = next(get_db())
+
+    # Start the background task
+    task = asyncio.create_task(store_stock_data(db))
+
+    yield
+
+    # Clean up when the app shuts down
+    task.cancel()  # Cancel the background task
+    try:
+        await task  # Wait for the task to be canceled
+    except asyncio.CancelledError:
+        pass  # Task was canceled, no action needed
+    db.close()  # Close the database session
 
 app = FastAPI(lifespan=lifespan)
 
