@@ -2,10 +2,10 @@ from fastapi import APIRouter, Request
 import httpx
 from dependencies import templates
 from models import Stock
-from external_api import STOCKS_API_URL
 
 router = APIRouter()
 
+STOCKS_API_URL = "https://script.google.com/macros/s/AKfycbyE3x3exGpNQaIADJ8L8Vu6X9OyoHiU3uhGTgTKuKVsNT-X-C68JyiWsmkAj7ffqTT1/exec"
 
 @router.get("/stocks")
 async def stocks(request: Request):

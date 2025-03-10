@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Request, Form
 from dependencies import db_dependency, templates
-from schema import Register_pyd_schema
 from pydantic import ValidationError
 from fastapi.responses import RedirectResponse
 from models import User
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 
+class Register_pyd_schema(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=3, max_length=255)
+    pass_confirm: str = Field(..., min_length=3, max_length=255)
 
 
 @router.get("/register")

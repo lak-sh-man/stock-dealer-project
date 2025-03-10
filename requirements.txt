@@ -6,3 +6,9 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 python-multipart==0.0.20
 httpx==0.28.1
+
+
+
+
+# netstat -ano | findstr :8000
+# taskkill /PID 14796 /F
