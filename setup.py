@@ -1,13 +1,13 @@
 import os
-
 from fastapi import FastAPI
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-
-import asyncio
 from contextlib import asynccontextmanager
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi.websockets import WebSocketState
+import asyncio
+from colorama import Back, Style
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URL = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -21,9 +21,9 @@ import models
 # Creates db.sqlite file
 Base.metadata.create_all(bind=engine)
 
+########################################################################################
 
 latest_stock_data = []
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,8 +32,6 @@ async def lifespan(app: FastAPI):
     # Import inside the function to avoid circular imports
     from routes.stocks import fetch_stock_data
     from dependencies import get_db, db_dependency
-
-
 
     async def update_stock_data():
         global latest_stock_data
@@ -61,18 +59,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
 ########################################################################################
 
-
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from fastapi.websockets import WebSocketState
-import asyncio
-from colorama import Back, Style
-
 router = APIRouter()
-
-
 connected_clients = {}
 
 # WebSocket for real-time stock updates
@@ -110,16 +99,10 @@ async def stock_updates(websocket: WebSocket, user_id: str):
 
         print(Back.RED + f"WebSocket disconnected => User ID: {user_id} | Remaining Clients: {list(connected_clients.keys())}" + Style.RESET_ALL)
         
-        
-        
 ########################################################################################
 
-
-
-import asyncio
 from dependencies import db_dependency
 from models import Stock
-
 
 # Background task to store stock data every minute
 async def store_stock_data(db: db_dependency):
