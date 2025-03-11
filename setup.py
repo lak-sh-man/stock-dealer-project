@@ -137,7 +137,9 @@ async def lifespan(app: FastAPI):
                                 currency=str(stock["currency"]),
                                 traded_time=str(stock["traded_time"]),
                             )
+                            print(Back.MAGENTA + "before adding" + Style.RESET_ALL + Style.RESET_ALL)
                             db.add(db_stock)
+                            print(Back.MAGENTA + "after adding" + Style.RESET_ALL + Style.RESET_ALL)
 
                     await db.commit()
                     print(Back.MAGENTA + "✅ Database update successful!" + Style.RESET_ALL)
