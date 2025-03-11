@@ -39,10 +39,16 @@ async def fetch_stock_data():
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             response = await client.get(STOCKS_API_URL)
+            response.raise_for_status()
             data = response.json()
             return data
+        except httpx.HTTPStatusError as e:
+            print(f"⚠️ HTTP error: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            print(f"⚠️ Network error: {e}")
         except Exception as e:
-            return []
+            print(f"⚠️ Unexpected error: {e}")
+        return []
 
 ########################################################################################
 
@@ -61,25 +67,28 @@ async def lifespan(app: FastAPI):
         global latest_stock_data, data_available_event
         
         while True:
-            print(Back.WHITE + "Fetching stock data..." + Style.RESET_ALL)
+            print(Back.WHITE + "Fetching api data..." + Style.RESET_ALL)
             latest_stock_data = await fetch_stock_data()  # Update the shared variable
             if latest_stock_data:  # Only update if new data is available
-                latest_stock_data = latest_stock_data
+                print(Back.YELLOW + f"stock data response is successful" + Style.RESET_ALL)
                 data_available_event.set() 
             print(Back.WHITE + f"Fetched {len(latest_stock_data)} stocks" + Style.RESET_ALL)
-            await asyncio.sleep(15)  # for each 15 sec, external api is called
+            await asyncio.sleep(60)  # for each 60 sec, external api is called
 
     async def store_stock_data():
+        print(Back.YELLOW + f"entered inside store_stock_data" + Style.RESET_ALL)
         global latest_stock_data, data_available_event
         from models import Stock
-        await asyncio.sleep(5)  # Small delay to ensure data is available
 
+        print(Back.YELLOW + f"waiting outside SessionLocal()" + Style.RESET_ALL)
         async with SessionLocal() as db:
+            print(Back.YELLOW + f"entered inside SessionLocal()" + Style.RESET_ALL)
             while True:
-                """now storing in the database starts only after new stock data is fetched, just like in synchronous execution. """
+                # now storing in the database starts only after new stock data is fetched, just like in synchronous execution.
+                print(Back.YELLOW + f"waiting for green signal" + Style.RESET_ALL)
                 await data_available_event.wait()  # Wait until new data is available
                 data_available_event.clear()  # Reset the event after processing
-                print(Back.WHITE + f"green signal sent" + Style.RESET_ALL)
+                print(Back.YELLOW + f"green signal sent" + Style.RESET_ALL)
                 
                 if latest_stock_data:
                     stock_data_copy = latest_stock_data.copy()  # Prevent overwrite
@@ -87,7 +96,7 @@ async def lifespan(app: FastAPI):
                     stock_data = stock_data_copy[:2]  # Take only the first 2 stocks
 
                     for stock in stock_data:
-                        print(Back.WHITE + f"Processing stock: {stock['Code']}" + Style.RESET_ALL)
+                        print(Back.WHITE + f"Processing stock: {stock}" + Style.RESET_ALL)
                         stmt = select(Stock).where(Stock.code == stock["Code"])
                         result = await db.execute(stmt)
                         existing_stock = result.scalars().first()
