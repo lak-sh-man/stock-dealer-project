@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from fastapi.responses import RedirectResponse
 from models import User
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 router = APIRouter()
 
@@ -33,7 +34,10 @@ async def login_post(
         return templates.TemplateResponse("login.html", {"request": request, "errors": e.errors()})
 
     # Check user in database
-    user = db.query(User).filter(User.username == login_data.username).first()
+    results = await db.execute(select(User).where(User.username == login_data.username))
+    user = results.scalars().first()  # Extract the first result
+    # query syntax is not supported in asunc db
+    # user = db.query(User).filter(User.username == login_data.username).first()
     if user and user.password == login_data.password:
         request.session["session_user_id"] = user.id
         request.session["session_user_name"] = user.username

@@ -1,10 +1,11 @@
-from setup import SessionLocal, app
+from setup import SessionLocal, app, engine, Base, get_db
 from sqlalchemy.orm import Session
 from typing import Annotated
 from fastapi import Depends
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 # tell fastapi the template location
@@ -18,13 +19,7 @@ app.add_middleware(SessionMiddleware, secret_key="lak-sh-man")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 # Annotated Dependency for DB Session
-db_dependency = Annotated[Session, Depends(get_db)]
+db_dependency = Annotated[AsyncSession, Depends(get_db)]

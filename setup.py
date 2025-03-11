@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import asynccontextmanager
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -9,17 +9,30 @@ from fastapi.websockets import WebSocketState
 import asyncio
 from colorama import Back, Style
 
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URL = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={'check_same_thread': False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///' + os.path.join(basedir, 'db.sqlite')
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, connect_args={'check_same_thread': False})
+SessionLocal = async_sessionmaker(engine)
+
+class Base(DeclarativeBase):
+    pass
 
 # Import models before creating tables
 import models  
 
 # Creates db.sqlite file
-Base.metadata.create_all(bind=engine)
+# Dependency to get DB session
+async def get_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        await db.close()
 
 ########################################################################################
 
