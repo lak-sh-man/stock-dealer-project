@@ -22,8 +22,7 @@ class Base(DeclarativeBase):
     pass
 
 # Creates db.sqlite file
-async def get_db():
-            
+async def get_db():  
     db = SessionLocal()
     try:
         yield db
