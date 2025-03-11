@@ -137,7 +137,7 @@ async def lifespan(app: FastAPI):
     update_task = asyncio.create_task(update_stock_data())
     store_task = asyncio.create_task(store_stock_data())
 
-    yield
+    yield # this is literally an await for the lifespan function to run the scheduled update_task & store_task
 
     # Clean up when the app shuts down
     update_task.cancel()  # Cancel the update task
