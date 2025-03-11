@@ -47,33 +47,40 @@ async def fetch_stock_data():
 ########################################################################################
 
 latest_stock_data = []
+data_available_event = asyncio.Event()  # Event to signal when data is available
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global latest_stock_data  # Access the shared variable
+    global latest_stock_data, data_available_event  # Access the shared variable
     import models  # Import models before creating tables
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)  # Ensure tables exist
 
     async def update_stock_data():
-        global latest_stock_data
+        global latest_stock_data, data_available_event
         
         while True:
             print(Back.WHITE + "Fetching stock data..." + Style.RESET_ALL)
             latest_stock_data = await fetch_stock_data()  # Update the shared variable
             if latest_stock_data:  # Only update if new data is available
                 latest_stock_data = latest_stock_data
+                data_available_event.set() 
             print(Back.WHITE + f"Fetched {len(latest_stock_data)} stocks" + Style.RESET_ALL)
             await asyncio.sleep(15)  # for each 15 sec, external api is called
 
     async def store_stock_data():
-        global latest_stock_data  
+        global latest_stock_data, data_available_event
         from models import Stock
         await asyncio.sleep(5)  # Small delay to ensure data is available
 
         async with SessionLocal() as db:
             while True:
+                """now storing in the database starts only after new stock data is fetched, just like in synchronous execution. """
+                await data_available_event.wait()  # Wait until new data is available
+                data_available_event.clear()  # Reset the event after processing
+                print(Back.WHITE + f"green signal sent" + Style.RESET_ALL)
+                
                 if latest_stock_data:
                     stock_data_copy = latest_stock_data.copy()  # Prevent overwrite
                     print(Back.WHITE + f"Processing {len(latest_stock_data)} stocks" + Style.RESET_ALL)
@@ -132,7 +139,7 @@ async def lifespan(app: FastAPI):
 
                     await db.commit()  # Save changes to DB
                     print(Back.WHITE + "✅ Database commit successful!" + Style.RESET_ALL)
-                await asyncio.sleep(15)  # Store data every 15 sec
+                
 
     update_task = asyncio.create_task(update_stock_data())
     store_task = asyncio.create_task(store_stock_data())
