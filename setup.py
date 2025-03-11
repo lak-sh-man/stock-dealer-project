@@ -1,4 +1,5 @@
 import os
+import httpx
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
@@ -31,6 +32,20 @@ async def get_db():
 
 ########################################################################################
 
+STOCKS_API_URL = "https://script.google.com/macros/s/AKfycbyE3x3exGpNQaIADJ8L8Vu6X9OyoHiU3uhGTgTKuKVsNT-X-C68JyiWsmkAj7ffqTT1/exec"
+
+# Fetch stock data from API
+async def fetch_stock_data():
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        try:
+            response = await client.get(STOCKS_API_URL)
+            data = response.json()
+            return data
+        except Exception as e:
+            return []
+
+########################################################################################
+
 latest_stock_data = []
 
 @asynccontextmanager
@@ -43,7 +58,6 @@ async def lifespan(app: FastAPI):
 
     async def update_stock_data():
         global latest_stock_data
-        from routes.stocks import fetch_stock_data
         
         while True:
             print(Back.WHITE + "Fetching stock data..." + Style.RESET_ALL)
