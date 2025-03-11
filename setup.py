@@ -11,8 +11,8 @@ import asyncio
 from colorama import Back, Style
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.future import select
-
-
+from typing import Annotated
+from fastapi import Depends
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -29,6 +29,9 @@ async def get_db():
         yield db
     finally:
         await db.close()
+        
+# Annotated Dependency for DB Session
+db_dependency = Annotated[AsyncSession, Depends(get_db)]
 
 ########################################################################################
 

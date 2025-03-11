@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Form
-from dependencies import db_dependency, templates
+from dependencies import templates
+from setup import db_dependency
 from pydantic import ValidationError
 from fastapi.responses import RedirectResponse
 from models import User
