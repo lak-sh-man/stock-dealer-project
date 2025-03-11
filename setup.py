@@ -98,7 +98,7 @@ async def lifespan(app: FastAPI):
                         existing_stock = result.scalars().first()
 
                         if existing_stock:
-                            print(Back.MAGENTA + "🅰️ Updating existing stock" + Style.RESET_ALL + Style.RESET_ALL)
+                            print(Back.MAGENTA + "🅰️ Updating existing stock" + Style.RESET_ALL)
                             existing_stock.company_name = str(stock["Company_Name"])
                             existing_stock.ltp = str(stock["LTP"])
                             existing_stock.price_open = str(stock["Price_Open"])
@@ -118,7 +118,7 @@ async def lifespan(app: FastAPI):
                             existing_stock.currency = str(stock["currency"])
                             existing_stock.traded_time = str(stock["traded_time"])
                         else:
-                            print(Back.MAGENTA + "🅱️ Adding new stock" + Style.RESET_ALL + Style.RESET_ALL)
+                            print(Back.MAGENTA + "🅱️ Adding new stock" + Style.RESET_ALL)
                             db_stock = Stock(
                                 company_name=str(stock["Company_Name"]),
                                 code=str(stock["Code"]),
@@ -140,9 +140,9 @@ async def lifespan(app: FastAPI):
                                 currency=str(stock["currency"]),
                                 traded_time=str(stock["traded_time"]),
                             )
-                            print(Back.MAGENTA + "before adding" + Style.RESET_ALL + Style.RESET_ALL)
+                            print(Back.MAGENTA + "before adding" + Style.RESET_ALL)
                             db.add(db_stock)
-                            print(Back.MAGENTA + "after adding" + Style.RESET_ALL + Style.RESET_ALL)
+                            print(Back.MAGENTA + "after adding" + Style.RESET_ALL)
 
                     await db.commit()
                     print(Back.MAGENTA + "✅ Database update successful!" + Style.RESET_ALL)
