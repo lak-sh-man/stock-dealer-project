@@ -20,32 +20,32 @@ class Stock(Base):
     code = Column(String(50), unique=True, nullable=False)
 
     # Price Details
-    ltp = Column(Float, nullable=False)
-    price_open = Column(Float, nullable=False)
-    high = Column(Float, nullable=False)
-    low = Column(Float, nullable=False)
-    closeyest = Column(Float, nullable=False)
+    ltp = Column(String(50), nullable=False)
+    price_open = Column(String(50), nullable=False)
+    high = Column(String(50), nullable=False)
+    low = Column(String(50), nullable=False)
+    closeyest = Column(String(50), nullable=False)
 
     # Change Details
-    change = Column(Float, nullable=False)
-    change_percent = Column(Float, nullable=False)
+    change = Column(String(50), nullable=False)
+    change_percent = Column(String(50), nullable=False)
 
     # Volume Details
-    volume = Column(BigInteger, nullable=False)
-    volume_avg = Column(BigInteger, nullable=False)
+    volume = Column(String(50), nullable=False)
+    volume_avg = Column(String(50), nullable=False)
 
     # Market Info
-    marketcap = Column(BigInteger, nullable=False)
-    pe_ratio = Column(Float, nullable=False)
-    eps = Column(Float, nullable=False)
-    outstanding_shares = Column(BigInteger, nullable=False)
+    marketcap = Column(String(50), nullable=False)
+    pe_ratio = Column(String(50), nullable=False)
+    eps = Column(String(50), nullable=False)
+    outstanding_shares = Column(String(50), nullable=False)
 
     # 52-Week High & Low
-    week_52_high = Column(Float, nullable=False)
-    week_52_low = Column(Float, nullable=False)
+    week_52_high = Column(String(50), nullable=False)
+    week_52_low = Column(String(50), nullable=False)
 
     # Currency
     currency = Column(String(10), nullable=False, default="INR")
 
     # Trade Time
-    traded_time = Column(DateTime, nullable=False)
+    traded_time = Column(String(50), nullable=False)
