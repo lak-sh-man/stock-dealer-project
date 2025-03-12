@@ -8,7 +8,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    balance = Column(Float, nullable=False, default=100000.0)
+    virtual_balance = Column(Float, nullable=False, default=100000.0)
 
 
 class Stock(Base):
@@ -49,3 +49,6 @@ class Stock(Base):
 
     # Trade Time
     traded_time = Column(String(50), nullable=False)
+    
+    # virtual stocks
+    virtual_stocks = Column(Integer, nullable=False, default=100000)

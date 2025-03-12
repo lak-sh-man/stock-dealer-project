@@ -62,8 +62,9 @@ async def lifespan(app: FastAPI):
     global latest_stock_data  # Access the shared variable
     import models  # Import models before creating tables
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)  # Ensure tables exist
+    # when server starts, this is started, when using alembic, we can comment this out 
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.create_all)  # Ensure tables exist
 
     async def fetch_and_store():
         global latest_stock_data
