@@ -1,5 +1,6 @@
 fastapi==0.115.11
 uvicorn==0.34.0
+websockets==15.0.1
 SQLAlchemy==2.0.38
 alembic==1.15.1
 itsdangerous==2.2.0
