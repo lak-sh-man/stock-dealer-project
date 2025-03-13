@@ -6,7 +6,7 @@ Before you begin, ensure you have the following installed:
 
 - **Python** (≥ 3.9.6)
 
-## Steps to Set Up and Run the Django Chat App Locally 
+## Steps to Set Up the app locally 
 
 ### 1. Clone the Repository
 Clone this repository to your local machine:
