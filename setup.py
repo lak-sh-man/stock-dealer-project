@@ -1,4 +1,5 @@
 import os
+import json
 import httpx
 from fastapi import FastAPI
 from sqlalchemy import create_engine
@@ -203,12 +204,24 @@ async def stock_updates(websocket: WebSocket, user_id: str):
     connected_clients[user_id] = websocket
     print(Back.GREEN + f"WebSocket connected => User ID: {user_id} | connected_clients: {list(connected_clients.keys())}" + Style.RESET_ALL)
     try:
+        # Wait for stock list from the client
+        stocks_data_from_html = await websocket.receive_text()
+        text_data_json = json.loads(stocks_data_from_html)
+        
+        # Extract the list correctly
+        stock_codes_list = text_data_json.get("stock_codes_dict", [])  # Ensure it's a list
         while True:
-            print(Back.WHITE + f"{len(latest_stock_data)}" + Style.RESET_ALL)
+            filtered_stock_data = []
+            for stock in latest_stock_data:
+                if stock["Code"] in stock_codes_list:
+                    # If it is, append the stock to the filtered_stock_data list
+                    filtered_stock_data.append(stock)
+            
+            print(Back.WHITE + f"{len(filtered_stock_data)}" + Style.RESET_ALL)
             if latest_stock_data:
                 if websocket.client_state != WebSocketState.CONNECTED:
                     break  # Exit the loop if the connection is closed
-                await websocket.send_json(latest_stock_data[0:100])  # Send the latest data
+                await websocket.send_json(filtered_stock_data)  # Send the latest data
                 print(Back.BLUE + f"Sent message to {user_id}" + Style.RESET_ALL)
 
             await asyncio.sleep(1)  # for each 10 sec, socket data is sent

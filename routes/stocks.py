@@ -26,8 +26,11 @@ async def stocks(request: Request,
     results = await db.execute(select(Stock).offset(offset).limit(per_page))
     stocks = results.scalars().all()
     
+    # Extract stock symbols (or IDs) to send via WebSocket
+    stock_codes = [stock.code for stock in stocks]  # Use stock_id if preferred
     return templates.TemplateResponse("stocks.html", {"request": request, 
                                                       "session_user_id": request.session["session_user_id"],
                                                       "stocks": stocks,
                                                       "page": page,
-                                                      "total_pages": total_pages})
+                                                      "total_pages": total_pages,
+                                                      "stock_codes": stock_codes})

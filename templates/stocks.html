@@ -52,10 +52,12 @@
 
     <script>
         let userId = "{{ session_user_id }}";
+        let stock_codes = "{{ stock_codes }}";  // Get stocks from Jinja2
         let socket = new WebSocket("ws://localhost:8000/ws/stocks/" + userId);
     
         socket.onopen = function(event) {
             console.log("WebSocket connected!");
+            socket.send(JSON.stringify({'stock_codes_dict': stock_codes}))
         };
         
         socket.onerror = function(event) {
