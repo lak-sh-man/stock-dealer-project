@@ -59,6 +59,10 @@ latest_stock_data = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Event to signal new data arrival, keep in mind to create this after starting the server, 
+    # or else "attached to a different loop occurs" this error occurs
+    data_update_event = asyncio.Event() 
+     
     global latest_stock_data  # Access the shared variable
     import models  # Import models before creating tables
 
@@ -75,84 +79,100 @@ async def lifespan(app: FastAPI):
 
             if new_data:
                 latest_stock_data = new_data  # Update only if valid data is received
-                print(Back.MAGENTA + f"✅ Fetched {len(latest_stock_data)} stocks" + Style.RESET_ALL)
-
-            await asyncio.sleep(60)  # Wait 60 seconds before fetching again
+                print(Back.MAGENTA + f"✅ Fetched {len(latest_stock_data)} stocks, setting event..." + Style.RESET_ALL)
+                data_update_event.set()  # Signal store_stock_data to process the data
+                print(Back.MAGENTA + "✅ Event set, waiting for 60 seconds..." + Style.RESET_ALL)
+                await asyncio.sleep(60)  # Wait 60 seconds before fetching again
+            else:
+                print(Back.MAGENTA + "⚠️ No new data, waiting for 5 seconds..." + Style.RESET_ALL)
+                await asyncio.sleep(5)  # Wait 5 seconds before fetching again
 
     async def store_stock_data():
-        """Store the in-memory latest fetched stock data in the database."""
-        print(Back.MAGENTA + "💾 Storing stock data..." + Style.RESET_ALL)
-        global latest_stock_data  
-        from models import Stock
+        try:
+            """Store the in-memory latest fetched stock data in the database."""
+            print(Back.MAGENTA + "💾 Storing stock data..." + Style.RESET_ALL)
+            global latest_stock_data  
+            from models import Stock
 
-        async with SessionLocal() as db:
-            while True:
-                if latest_stock_data:
-                    stock_data_copy = latest_stock_data.copy()  # Prevent modification during processing
-                    print(Back.MAGENTA + f"📦 Processing {len(stock_data_copy)} stocks" + Style.RESET_ALL)
-                    stock_data = stock_data_copy  # Process only the first 2 stocks
-                    try:
-                        for stock in stock_data:
-                            print(Back.MAGENTA + f"📦 Processing stock: {stock}" + Style.RESET_ALL)
-                            stmt = select(Stock).where(Stock.code == stock["Code"])
-                            result = await db.execute(stmt)
-                            existing_stock = result.scalars().first()
+            async with SessionLocal() as db:
+                while True:
+                    print(Back.MAGENTA + "Inside while loop, waiting for event..." + Style.RESET_ALL)
+                    await data_update_event.wait()  # Wait until fetch_and_store() signals new data
+                    print(Back.MAGENTA + "✅ Event triggered, processing data..." + Style.RESET_ALL)
+                    if latest_stock_data:
+                        print(Back.MAGENTA + "🔍 Latest stock data is available." + Style.RESET_ALL)
+                        stock_data_copy = latest_stock_data.copy()  # Prevent modification during processing
+                        print(Back.MAGENTA + f"📦 Processing {len(stock_data_copy)} stocks" + Style.RESET_ALL)
 
-                            if existing_stock:
-                                print(Back.MAGENTA + "🅰️ Updating existing stock" + Style.RESET_ALL)
-                                existing_stock.company_name = str(stock["Company_Name"])
-                                existing_stock.code_act = str(stock["Code_act"])
-                                existing_stock.ltp = str(stock["LTP"])
-                                existing_stock.price_open = str(stock["Price_Open"])
-                                existing_stock.high = str(stock["high"])
-                                existing_stock.low = str(stock["low"])
-                                existing_stock.closeyest = str(stock["closeyest"])
-                                existing_stock.change = str(stock["change"])
-                                existing_stock.change_percent = str(stock["Change_percent"])
-                                existing_stock.volume = str(stock["Volume"])
-                                existing_stock.volume_avg = str(stock["Volume_avg"])
-                                existing_stock.marketcap = str(stock["Marketcap"])
-                                existing_stock.pe_ratio = str(stock["PE"])
-                                existing_stock.eps = str(stock["EPS"])
-                                existing_stock.outstanding_shares = str(stock["Outstanding_Shares"])
-                                existing_stock.week_52_high = str(stock["52_week_high"])
-                                existing_stock.week_52_low = str(stock["52_week_low"])
-                                existing_stock.currency = str(stock["currency"])
-                                existing_stock.traded_time = str(stock["traded_time"])
-                            else:
-                                print(Back.MAGENTA + "🅱️ Adding new stock" + Style.RESET_ALL)
-                                db_stock = Stock(
-                                    company_name=str(stock["Company_Name"]),
-                                    code_act=str(stock["Code_act"]),
-                                    code=str(stock["Code"]),
-                                    ltp=str(stock["LTP"]),
-                                    price_open=str(stock["Price_Open"]),
-                                    high=str(stock["high"]),
-                                    low=str(stock["low"]),
-                                    closeyest=str(stock["closeyest"]),
-                                    change=str(stock["change"]),
-                                    change_percent=str(stock["Change_percent"]),
-                                    volume=str(stock["Volume"]),
-                                    volume_avg=str(stock["Volume_avg"]),
-                                    marketcap=str(stock["Marketcap"]),
-                                    pe_ratio=str(stock["PE"]),
-                                    eps=str(stock["EPS"]),
-                                    outstanding_shares=str(stock["Outstanding_Shares"]),
-                                    week_52_high=str(stock["52_week_high"]),
-                                    week_52_low=str(stock["52_week_low"]),
-                                    currency=str(stock["currency"]),
-                                    traded_time=str(stock["traded_time"]),
-                                )
-                                print(Back.MAGENTA + "before adding" + Style.RESET_ALL)
-                                db.add(db_stock)
-                                print(Back.MAGENTA + "after adding" + Style.RESET_ALL)
+                        try:
+                            for stock in stock_data_copy:
+                                print(Back.MAGENTA + f"📦 Processing stock: {stock}" + Style.RESET_ALL)
+                                stmt = select(Stock).where(Stock.code == stock["Code"])
+                                result = await db.execute(stmt)
+                                existing_stock = result.scalars().first()
 
-                        await db.commit()
-                        print(Back.MAGENTA + "✅ Database update successful!" + Style.RESET_ALL)
-                
-                    except Exception as e:
-                        print(Back.RED + f"❌ Error while storing stock: {e}" + Style.RESET_ALL)   
-                await asyncio.sleep(60) 
+                                if existing_stock:
+                                    print(Back.MAGENTA + "🅰️ Updating existing stock" + Style.RESET_ALL)
+                                    existing_stock.company_name = str(stock["Company_Name"])
+                                    existing_stock.code_act = str(stock["Code_act"])
+                                    existing_stock.ltp = str(stock["LTP"])
+                                    existing_stock.price_open = str(stock["Price_Open"])
+                                    existing_stock.high = str(stock["high"])
+                                    existing_stock.low = str(stock["low"])
+                                    existing_stock.closeyest = str(stock["closeyest"])
+                                    existing_stock.change = str(stock["change"])
+                                    existing_stock.change_percent = str(stock["Change_percent"])
+                                    existing_stock.volume = str(stock["Volume"])
+                                    existing_stock.volume_avg = str(stock["Volume_avg"])
+                                    existing_stock.marketcap = str(stock["Marketcap"])
+                                    existing_stock.pe_ratio = str(stock["PE"])
+                                    existing_stock.eps = str(stock["EPS"])
+                                    existing_stock.outstanding_shares = str(stock["Outstanding_Shares"])
+                                    existing_stock.week_52_high = str(stock["52_week_high"])
+                                    existing_stock.week_52_low = str(stock["52_week_low"])
+                                    existing_stock.currency = str(stock["currency"])
+                                    existing_stock.traded_time = str(stock["traded_time"])
+                                else:
+                                    print(Back.MAGENTA + "🅱️ Adding new stock" + Style.RESET_ALL)
+                                    db_stock = Stock(
+                                        company_name=str(stock["Company_Name"]),
+                                        code_act=str(stock["Code_act"]),
+                                        code=str(stock["Code"]),
+                                        ltp=str(stock["LTP"]),
+                                        price_open=str(stock["Price_Open"]),
+                                        high=str(stock["high"]),
+                                        low=str(stock["low"]),
+                                        closeyest=str(stock["closeyest"]),
+                                        change=str(stock["change"]),
+                                        change_percent=str(stock["Change_percent"]),
+                                        volume=str(stock["Volume"]),
+                                        volume_avg=str(stock["Volume_avg"]),
+                                        marketcap=str(stock["Marketcap"]),
+                                        pe_ratio=str(stock["PE"]),
+                                        eps=str(stock["EPS"]),
+                                        outstanding_shares=str(stock["Outstanding_Shares"]),
+                                        week_52_high=str(stock["52_week_high"]),
+                                        week_52_low=str(stock["52_week_low"]),
+                                        currency=str(stock["currency"]),
+                                        traded_time=str(stock["traded_time"]),
+                                    )
+                                    print(Back.MAGENTA + "before adding" + Style.RESET_ALL)
+                                    db.add(db_stock)
+                                    print(Back.MAGENTA + "after adding" + Style.RESET_ALL)
+
+                            await db.commit()
+                            print(Back.MAGENTA + "✅ Database update successful!" + Style.RESET_ALL)
+                    
+                        except Exception as e:
+                            print(Back.RED + f"❌ Error while storing stock: {e}" + Style.RESET_ALL)   
+                    
+                    # Clear the event AFTER processing the data
+                    data_update_event.clear()
+                    print(Back.MAGENTA + "✅ Event cleared after processing data." + Style.RESET_ALL)
+                    # await asyncio.sleep(60) 
+
+        except Exception as e:
+            print(Back.RED + f"❌ Unexpected error in store_stock_data: {e}" + Style.RESET_ALL)
 
     update_task = asyncio.create_task(fetch_and_store())
     store_task = asyncio.create_task(store_stock_data())

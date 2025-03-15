@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="jumbotron">
-    <h1>Stocks list</h1>
+    <h1>Stocks List</h1>
   </div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        {% if page > 1 %}
+        <a href="{{ url_for('stocks') }}?page={{ page-1 }}">Previous</a>
+        {% endif %}
+        <span> Page {{ page }} of {{ total_pages }} </span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('stocks') }}?page={{ page+1 }}">Next</a>
+        {% endif %}
+    </div>
 
     <table class="table table-striped" id="stock-table">
         <thead>
@@ -13,51 +23,33 @@
                 <th>Open Price</th>
                 <th>High Price</th>
                 <th>Low Price</th>
-                <th>Market Cap</th>
-                <th>Traded Time</th>
             </tr>
         </thead>
         <tbody id="stock-table-body">
-            <!-- Data will be inserted here dynamically -->
+            <!-- Initially rendering database stocks -->
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.company_name }}</td>
+                <td>{{ stock.outstanding_shares }}</td>
+                <td>{{ stock.ltp }}</td>
+                <td>{{ stock.price_open }}</td>
+                <td>{{ stock.high }}</td>
+                <td>{{ stock.low }}</td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 
-    <script>
-        let userId = "{{ session_user_id }}";
-        let socket = new WebSocket("ws://localhost:8000/ws/stocks/" + userId);
-    
-        socket.onopen = function(event) {
-            console.log("WebSocket connected!");
-        };
-        
-        socket.onerror = function(event) {
-            console.error("WebSocket error:", event);
-        };
-        
-        socket.onmessage = function(event) {
-            console.log("Message received:", event.data);
-        };
-    
-        socket.onmessage = function(event) {
-            let stocks_data_from_consumers = JSON.parse(event.data);
-            let tableBody = document.getElementById("stock-table-body");
-            tableBody.innerHTML = "";
-    
-            stocks_data_from_consumers.forEach(stock => {
-                let row = `<tr>
-                    <td>${stock.Company_Name}</td>
-                    <td>${stock.Outstanding_Shares}</td>
-                    <td>${stock.LTP}</td>
-                    <td>${stock.Price_Open}</td>
-                    <td>${stock.high}</td>
-                    <td>${stock.low}</td>
-                    <td>${stock.Marketcap}</td>
-                    <td>${new Date(stock.traded_time).toLocaleTimeString()}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        };
-    </script>
-    
+    <div style="text-align: center">
+        {% if page > 1 %}
+        <a href="{{ url_for('stocks') }}?page={{ page-1 }}">Previous</a>
+        {% endif %}
+        <span> Page {{ page }} of {{ total_pages }} </span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('stocks') }}?page={{ page+1 }}">Next</a>
+        {% endif %}
+    </div>
+
+
 {% endblock %}
  
