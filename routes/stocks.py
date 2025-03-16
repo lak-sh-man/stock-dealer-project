@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Form
 from dependencies import templates
 from setup import db_dependency
 from models import Stock
 from sqlalchemy import select, func
+from pydantic import BaseModel, Field, ValidationError
 
 router = APIRouter()
+
+class Stocks_pyd_schema(BaseModel):
+    order_quantity: int = Field(..., gt=0, le=100000)
+
 
 @router.get("/stocks")
 async def stocks(request: Request, 
@@ -34,3 +39,14 @@ async def stocks(request: Request,
                                                       "page": page,
                                                       "total_pages": total_pages,
                                                       "stock_codes": stock_codes})
+    
+
+@router.get("/place_order")
+async def place_order_get(request: Request,
+                          stock_code: str,
+                         ):
+    if "session_user_id" not in request.session:
+        return templates.TemplateResponse("/error_pages/errors.html", {"request": request, "errors": [{"msg": "User not authenticated"}]})
+    return templates.TemplateResponse("place_order.html", {"request": request,
+                                                           "stock_code": stock_code})
+    

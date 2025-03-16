@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="jumbotron">
+  <div class="jumbotron" style="margin-top: 30px;">
     <h1>Stocks List</h1>
     <p>Users can only buy & sell virtual stocks</p>
   </div>
 
-    <div style="text-align: center; margin-bottom: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
         {% if page > 1 %}
         <a href="{{ url_for('stocks') }}?page={{ page-1 }}">Previous</a>
         {% endif %}
@@ -31,7 +31,7 @@
             <!-- Initially rendering database stocks -->
             {% for stock in stocks %}
             <tr>
-                <td>{{ stock.company_name }}</td>
+                <td><a href="{{ url_for('place_order_get') }}?stock_code={{ stock.code }}">{{ stock.company_name }}</a></td>
                 <td>{{ stock.outstanding_shares }}</td>
                 <td>{{ stock.virtual_stocks }}</td>
                 <td>{{ stock.ltp }}</td>
@@ -43,7 +43,7 @@
         </tbody>
     </table>
 
-    <div style="text-align: center">
+    <div style="text-align: center; margin-top: 30px;">
         {% if page > 1 %}
         <a href="{{ url_for('stocks') }}?page={{ page-1 }}">Previous</a>
         {% endif %}
@@ -75,7 +75,7 @@
     
             stocks_data_from_consumers.forEach(stock => {
                 let row = `<tr>
-                    <td>${stock.Company_Name}</td>
+                    <td><a href="{{ url_for('place_order_get') }}?stock_code=${stock.Code}">${stock.Company_Name}</a></td>
                     <td>${stock.Outstanding_Shares}</td>
                     <td>100000</td>
                     <td>${stock.LTP}</td>

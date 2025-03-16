@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron" style="margin-top: 30px;">
+    <h1>Place Order | <span class="badge badge-warning">{{ stock_code }}</span></h1>
+  </div>
+
+  <div class="container" style="margin-top: 30px;">
+    <form class="form-group" method="POST">
+        <div class="form-group">
+            <label for="order_quantity">Order Quantity</label>
+            <input type="text" name="order_quantity" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="order_price">Order Price</label>
+            <select class="form-control" id="order_price" disabled>
+              <option>@Market Price</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" name="action" value="buy" class="btn btn-success">Buy</button>
+            <button type="submit" name="action" value="sell" class="btn btn-danger">Sell</button>
+        </div>
+    </form>
+
+    {% if errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for error in errors %}
+                <li>
+                    {% if 'loc' in error %}
+                        {{ error['loc'][0] }}: {{ error['msg'] }}
+                    {% else %}
+                        {{ error['msg'] }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+  </div>
+    
+
+{% endblock %}
+ 
