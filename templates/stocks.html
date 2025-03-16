@@ -2,6 +2,7 @@
 {% block content %}
   <div class="jumbotron">
     <h1>Stocks List</h1>
+    <p>Users can only buy & sell virtual stocks</p>
   </div>
 
     <div style="text-align: center; margin-bottom: 20px;">
@@ -19,6 +20,7 @@
             <tr>
                 <th>Company Name</th>
                 <th>Outstanding Shares</th>
+                <th>Virtual Stocks</th>
                 <th>LTP</th>
                 <th>Open Price</th>
                 <th>High Price</th>
@@ -31,6 +33,7 @@
             <tr>
                 <td>{{ stock.company_name }}</td>
                 <td>{{ stock.outstanding_shares }}</td>
+                <td>{{ stock.virtual_stocks }}</td>
                 <td>{{ stock.ltp }}</td>
                 <td>{{ stock.price_open }}</td>
                 <td>{{ stock.high }}</td>
@@ -74,6 +77,7 @@
                 let row = `<tr>
                     <td>${stock.Company_Name}</td>
                     <td>${stock.Outstanding_Shares}</td>
+                    <td>100000</td>
                     <td>${stock.LTP}</td>
                     <td>${stock.Price_Open}</td>
                     <td>${stock.high}</td>
