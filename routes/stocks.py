@@ -50,3 +50,13 @@ async def place_order_get(request: Request,
     return templates.TemplateResponse("place_order.html", {"request": request,
                                                            "stock_code": stock_code})
     
+
+@router.post("/place_order")
+async def place_order_post(request: Request,
+                           order_quantity = Form(...)
+                          ):
+    # Validate using Pydantic Model
+    try:
+        login_data = Stocks_pyd_schema(order_quantity=order_quantity)
+    except ValidationError as e:
+        return templates.TemplateResponse("place_order.html", {"request": request, "errors": e.errors()})
