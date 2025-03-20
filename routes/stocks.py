@@ -60,3 +60,4 @@ async def place_order_post(request: Request,
         login_data = Stocks_pyd_schema(order_quantity=order_quantity)
     except ValidationError as e:
         return templates.TemplateResponse("place_order.html", {"request": request, "errors": e.errors()})
+    return templates.TemplateResponse("account.html", {"request": request})
